@@ -28,8 +28,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model_type",
         type=str,
-        choices=["1dcnn", "2dcnn"],
-        default="2dcnn",
+        choices=["1dcnn", "2dcnn", "mock"],
+        default="mock",
         help="モデルタイプ",
     )
     parser.add_argument(
