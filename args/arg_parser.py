@@ -1,3 +1,6 @@
+import argparse
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="競技かるた「感じ」の音響学的解析")
 

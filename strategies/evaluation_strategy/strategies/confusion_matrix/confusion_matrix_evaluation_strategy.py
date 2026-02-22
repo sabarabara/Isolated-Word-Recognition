@@ -1,3 +1,11 @@
+import torch
+import numpy as np
+from sklearn.metrics import confusion_matrix
+from strategies.evaluation_strategy.evaluation_strategy import EvaluationStrategy
+from .registry import EVAL_REGISTRY
+
+
+@EVAL_REGISTRY.register("confusion")
 class ConfusionMatrixStrategy(EvaluationStrategy):
     def __init__(self, num_classes=100):
         self.num_classes = num_classes

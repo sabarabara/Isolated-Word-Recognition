@@ -8,7 +8,7 @@ import argparse
 import json
 import re
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 
 def parse_text_file(text_file: Path) -> Dict[int, str]:
@@ -80,7 +80,7 @@ def create_simple_annotation(
     for card_num, card_text in sorted(card_texts.items()):
         # 序歌（card_id=1）をスキップ
         if card_num == 1:
-            print(f"  序歌（card_id=1）をスキップ")
+            print("  序歌（card_id=1）をスキップ")
             continue
 
         # 通常の音声ファイルを使用（2桁ゼロパディング）

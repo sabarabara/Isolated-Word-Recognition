@@ -43,7 +43,7 @@ def main():
         os.makedirs(OUTPUT_DIR)
 
     # 2. 一次解析（広めに区間を特定）
-    print(f"解析中...")
+    print("解析中...")
     nonsilent_ranges = []
     is_in_sound = False
     start_ms = 0
@@ -118,7 +118,7 @@ def main():
     with open(LOG_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(log_lines))
 
-    print(f"\nすべて完了！")
+    print("\nすべて完了！")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,9 @@
+import torch
+from strategies.evaluation_strategy.evaluation_strategy import EvaluationStrategy
+from .registry import EVAL_REGISTRY
+
+
+@EVAL_REGISTRY.register("topk")
 class TopKEvaluationStrategy(EvaluationStrategy):
     def __init__(self, k_list=[1, 3, 5]):
         self.k_list = k_list

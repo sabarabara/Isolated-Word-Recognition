@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 仮想環境
+.venv/
+venv/
+env/
+
+# 研究データ（ここが重要！）
+# 重い音声データや中間生成物、学習済みモデルを除外します
+data/audio/
+data/anotation_data/
+data/outputs/
+results/
+*.wav
+*.mp3
+*.pth
+*.pkl
+
+# 設定・ログ
+.vscode/
+.idea/
+*.log
