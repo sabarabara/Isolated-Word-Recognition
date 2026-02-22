@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from strategies.evaluation_strategy.evaluation_strategy import EvaluationStrategy
-from .registry import EVAL_REGISTRY
+from strategies.registry import EVAL_REGISTRY
 
 
 @EVAL_REGISTRY.register("confusion")
