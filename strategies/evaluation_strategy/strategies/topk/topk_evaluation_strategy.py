@@ -13,9 +13,10 @@ class TopKEvaluationStrategy(EvaluationStrategy):
         results = {}
 
         for k in self.k_list:
-            _, top_k_indices = probs.topk(k, dim=1)
+            k_eff = min(k, output.size(1))
+            _, top_k_indices = probs.topk(k_eff, dim=1)
             correct_k = top_k_indices.eq(target.view(-1, 1).expand_as(top_k_indices))
-            acc = correct_k.any(dim=1).float().mean().item()
-            results[f"top_{k}_acc"] = acc
+            acc = correct_k.any(dim=1).float().mean().item() * 100.0
+            results[f"top_{k}"] = acc
 
         return results

@@ -7,8 +7,8 @@ from pydub import AudioSegment
 # ==========================================
 # 設定エリア
 # ==========================================
-TARGET_DIR = "outputs/wavs/output_12wavs"  # 分割済みファイルがある場所
-LOG_FILE = "outputs/stt/transcription_large12.txt"
+TARGET_DIR = "../data/outputs/split/wavs/output_06wavs"  # 分割済みファイルがある場所
+LOG_FILE = "../data/outputs/split/stt/transcription_large06.txt"
 MODEL_SIZE = "large-v3"  # 軽量で速いモデル
 LANGUAGE = "ja"
 

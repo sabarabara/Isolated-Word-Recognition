@@ -4,11 +4,10 @@ import librosa
 import numpy as np
 from pydub import AudioSegment
 
-INPUT_FILE = "data/audio/raw/singer2/5_+100.wav"
-OUTPUT_DIR = "outputs/wavs/output_12wavs"
-LOG_FILE = "outputs/texts/output_12wavs.txt"
+INPUT_FILE = "../../data/audio/singer1/01.wav"
+OUTPUT_DIR = "../../data/outputs/split/wavs/output_01wavs"
+LOG_FILE = "../../data/outputs/split/intervals/output_01wavs.txt"
 
-# 判定基準（pydub一次解析用）
 SILENCE_THRESH = -20.0
 MIN_SILENCE_LEN = 1000
 MIN_SOUND_LEN = 3000

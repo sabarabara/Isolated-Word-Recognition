@@ -4,8 +4,8 @@ from pydub import AudioSegment
 
 # --- 設定項目 ---
 keep_sec = 0.5  # 抽出する秒数
-input_dir = "outputs/wavs/output_06wavs"
-output_dir = "outputs/split/0.5s/06wavs"
+input_dir = "../data/outputs/split/wavs/output_06wavs"
+output_dir = "../data/outputs/segment/0.5s/06wavs"
 # ----------------
 
 if not os.path.exists(output_dir):

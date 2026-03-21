@@ -1,4 +1,4 @@
-"""CNN1D モデルストラテジー。"""
+"""LSTM モデルストラテジー。"""
 from pathlib import Path
 from typing import Optional
 
@@ -6,8 +6,8 @@ from strategies.registry import MODEL_REGISTRY
 from strategies.model_strategy.model_strategy import ModelStrategy
 
 
-@MODEL_REGISTRY.register("1dcnn")
-class CNN1DStrategy(ModelStrategy):
+@MODEL_REGISTRY.register("lstm")
+class LSTMStrategy(ModelStrategy):
 
     def __init__(self, eval_strategy: Optional[object] = None, config: dict = None):
         super().__init__(eval_strategy=eval_strategy)
@@ -19,11 +19,11 @@ class CNN1DStrategy(ModelStrategy):
         self.val_loader = None
 
     def _lazy_imports(self):
-        from strategies.model_strategy.strategys.cnn1d.dataset import CNN1DDataset
-        from strategies.model_strategy.strategys.cnn1d.model import CNN1DModel
-        from strategies.model_strategy.strategys.cnn1d.trainer import Trainer
-        from strategies.model_strategy.strategys.cnn1d.evaluator import Evaluator
-        return CNN1DDataset, CNN1DModel, Trainer, Evaluator
+        from strategies.model_strategy.strategys.LSTM.dataset import LSTMDataset
+        from strategies.model_strategy.strategys.LSTM.model import LSTMModel
+        from strategies.model_strategy.strategys._shared.base_trainer import Trainer
+        from strategies.model_strategy.strategys._shared.base_evaluator import Evaluator
+        return LSTMDataset, LSTMModel, Trainer, Evaluator
 
     def _make_exp_config(self):
         from configs.experiment_config import make_experiment_config
@@ -31,7 +31,7 @@ class CNN1DStrategy(ModelStrategy):
 
     def prepare_dataloader(self):
         try:
-            CNN1DDataset, _, _, _ = self._lazy_imports()
+            LSTMDataset, _, _, _ = self._lazy_imports()
         except Exception as e:
             print(f"prepare_dataloader: skipped (missing deps): {e}")
             return
@@ -40,7 +40,7 @@ class CNN1DStrategy(ModelStrategy):
         audio_dir = Path(self.config.get("audio_dir", "data/outputs/segment"))
         batch_size = int(self.config.get("batch_size", 8))
 
-        dataset = CNN1DDataset(annotation_dir, audio_dir, config=self.config)
+        dataset = LSTMDataset(annotation_dir, audio_dir, config=self.config)
 
         from torch.utils.data import DataLoader, random_split
         n_total = len(dataset)
@@ -54,7 +54,7 @@ class CNN1DStrategy(ModelStrategy):
 
     def build(self):
         try:
-            _, CNN1DModel, _, _ = self._lazy_imports()
+            _, LSTMModel, _, _ = self._lazy_imports()
         except Exception as e:
             print(f"build: skipped (missing deps): {e}")
             return
@@ -63,7 +63,7 @@ class CNN1DStrategy(ModelStrategy):
         self.device = torch.device(
             self.config.get("device", "cuda" if torch.cuda.is_available() else "cpu")
         )
-        self.model = CNN1DModel(config=self.config)
+        self.model = LSTMModel(config=self.config)
         print("build: model constructed")
 
     def train(self):

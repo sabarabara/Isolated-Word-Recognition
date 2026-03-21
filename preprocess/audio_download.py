@@ -2,17 +2,15 @@ import os
 
 import yt_dlp
 
-save_dir = "data/audio/raw/singer2"
+save_dir = "../data/audio/singer1"
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 
 # ダウンロードしたいURLのリスト
 urls = [
-    "https://www.youtube.com/watch?v=ZKgqHQfgsT8",
-    "https://www.youtube.com/watch?v=qOKQ6H4rK-s",
-    "https://www.youtube.com/watch?v=NTylpKj75qQ",
-    "https://www.youtube.com/watch?v=aX2Fy77GX0A",
-    "https://www.youtube.com/watch?v=g_jHJk92z4U",
+    "https://www.youtube.com/watch?v=BNGa7QsbyeQ",
+    "https://www.youtube.com/watch?v=xBzfs7MppWs",
+    "https://www.youtube.com/watch?v=cjq4ddzZ1u8",
 ]
 
 ydl_opts = {

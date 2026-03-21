@@ -1,0 +1,25 @@
+# 2dcnn 実験設定デフォルト値
+# make_experiment_config() でランタイムの config_dict とマージされる
+
+model:
+  num_classes: 100
+  dropout_conv: 0.2
+  dropout_final_conv: 0.3
+  adaptive_pool_output_2d: [4, 4]
+  fc_hidden_dim: 256
+  dropout_fc: 0.5
+
+training:
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  lr_scheduler_factor: 0.5
+  lr_scheduler_patience: 5
+  early_stopping_patience: 10
+  early_stopping_min_delta: 0.001
+  epochs: 10
+  grad_clip_max_norm: 1.0
+
+evaluation:
+  top_k_values: [1, 3, 5]
+
+sample_rate: 44100

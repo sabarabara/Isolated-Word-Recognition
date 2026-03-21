@@ -5,9 +5,9 @@ from pydub import AudioSegment
 # ==========================================
 # 設定エリア
 # ==========================================
-INPUT_FILE = "data/audio/raw/singer2/5_+100.wav"
-OUTPUT_DIR = "outputs/wavs/output_12wavs"
-LOG_FILE = "outputs/texts/output_12wavs.txt"
+INPUT_FILE = "../../data/audio/singer1/06.wav"
+OUTPUT_DIR = "../../data/outputs/split/wavs/output_06wavs"
+LOG_FILE = "../../data/outputs/split/intervals/output_06wavs.txt"
 
 # 判定基準
 SILENCE_THRESH = -20.0  # 区間を検出するための閾値

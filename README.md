@@ -8,11 +8,9 @@ karuta_project/
 ├── factories.py                # インスタンス生成（Factory Pattern）
 ├── main.py                     # メイン実行スクリプト
 ├── requirements.txt            # 依存ライブラリ
-├── args/                       # コマンドライン引数管理
-│   ├── __init__.py
-│   └── arg_parser.py
 ├── configs/                    # 設定ファイル
 │   ├── __init__.py
+│   ├── config.yaml             # Hydra 実行設定
 │   └── experiment_configs.yaml
 ├── data/                       # データディレクトリ
 │   ├── __init__.py
@@ -92,3 +90,6 @@ karuta_project/
 │       └── statistical_tests.py # 統計検定
 └── results/                    # 実験結果保存用
     └── __init__.py
+
+
+python main.py experiment_name=test data_dir=data annotation_dir=data/annotation_data
