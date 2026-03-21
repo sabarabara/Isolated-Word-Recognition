@@ -4,11 +4,11 @@ import numpy as np
 from pathlib import Path
 from typing import Optional
 
-from strategies.model_strategy.strategys._shared.base_dataset import KarutaBaseDataset
+from strategies.model_strategy.strategys._shared.base_dataset import BaseDataset
 from preprocess.feature_extraction import AudioConfig, compute_mel_spectrogram
 
 
-class GRUDataset(KarutaBaseDataset):
+class GRUDataset(BaseDataset):
     """(mel_seq_tensor, label, metadata) 形式で返すデータセット。
 
     mel_seq_tensor shape: (T, n_mels)  ← RNN の batch_first=True 入力に対応

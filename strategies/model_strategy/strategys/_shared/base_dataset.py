@@ -14,7 +14,7 @@ from utils.logging import setup_logging
 logger = setup_logging(__name__)
 
 
-class KarutaBaseDataset(Dataset):
+class BaseDataset(Dataset):
 
     def __init__(
         self,

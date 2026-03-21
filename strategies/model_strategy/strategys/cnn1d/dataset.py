@@ -4,11 +4,11 @@ import numpy as np
 from pathlib import Path
 from typing import Optional
 
-from strategies.model_strategy.strategys._shared.base_dataset import KarutaBaseDataset
+from strategies.model_strategy.strategys._shared.base_dataset import BaseDataset
 from preprocess.feature_extraction import normalize_waveform
 
 
-class CNN1DDataset(KarutaBaseDataset):
+class CNN1DDataset(BaseDataset):
     """(waveform_tensor, label, metadata) 形式で返すデータセット。
 
     waveform_tensor shape: (1, target_length)

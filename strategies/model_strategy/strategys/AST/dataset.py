@@ -3,11 +3,11 @@ import torch
 from pathlib import Path
 from typing import Optional
 
-from strategies.model_strategy.strategys._shared.base_dataset import KarutaBaseDataset
+from strategies.model_strategy.strategys._shared.base_dataset import BaseDataset
 from preprocess.feature_extraction import AudioConfig, compute_mel_spectrogram
 
 
-class ASTDataset(KarutaBaseDataset):
+class ASTDataset(BaseDataset):
     """(mel_2d_tensor, label, metadata) 形式で返すデータセット。
 
     mel_2d_tensor shape: (1, n_mels, T)
