@@ -17,7 +17,7 @@ for filename in os.listdir(input_dir):
         audio = AudioSegment.from_file(file_path)
 
         ms_to_keep = keep_sec * 1000
-        extracted_audio = audio[-ms_to_keep:]
+        extracted_audio = audio[:ms_to_keep]
 
         # 保存
         output_path = os.path.join(output_dir, filename)

@@ -2,9 +2,10 @@
 src/data/preprocessing.py
 音声セグメントからの特徴量抽出。
 """
+
 import numpy as np
 import librosa
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AudioConfig:
     """音声特徴量抽出の設定。"""
+
     n_mels: int = 128
     n_fft: int = 1024
     hop_length: int = 512
@@ -33,9 +35,7 @@ class AudioConfig:
 
 
 def compute_mel_spectrogram(
-    audio: np.ndarray,
-    sr: int,
-    config: AudioConfig
+    audio: np.ndarray, sr: int, config: AudioConfig
 ) -> np.ndarray:
     """
     メルスペクトログラムを計算する。
@@ -71,7 +71,7 @@ def compute_mel_spectrogram(
         hop_length=config.hop_length,
         fmin=config.fmin,
         fmax=config.fmax,
-        power=2.0  # パワースペクトログラム
+        power=2.0,  # パワースペクトログラム
     )
 
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max, top_db=80.0)
@@ -88,7 +88,7 @@ def compute_mfcc(
     sr: int,
     config: AudioConfig,
     include_delta: bool = True,
-    include_delta_delta: bool = True
+    include_delta_delta: bool = True,
 ) -> np.ndarray:
     """
     MFCC（メル周波数ケプストラム係数）を計算する。
@@ -121,7 +121,7 @@ def compute_mfcc(
         n_fft=config.n_fft,
         hop_length=config.hop_length,
         fmin=config.fmin,
-        fmax=config.fmax
+        fmax=config.fmax,
     )
 
     features_list = [mfcc]
@@ -138,11 +138,7 @@ def compute_mfcc(
     return features
 
 
-def compute_spectral_features(
-    audio: np.ndarray,
-    sr: int,
-    config: AudioConfig
-) -> dict:
+def compute_spectral_features(audio: np.ndarray, sr: int, config: AudioConfig) -> dict:
     """
     追加のスペクトル特徴量を計算する。
 
@@ -186,10 +182,7 @@ def compute_spectral_features(
     return features
 
 
-def normalize_waveform(
-    audio: np.ndarray,
-    target_length: int
-) -> np.ndarray:
+def normalize_waveform(audio: np.ndarray, target_length: int) -> np.ndarray:
     """
     生波形を正規化し、長さを調整する（1D-CNN用）。
 
@@ -226,7 +219,7 @@ def normalize_waveform(
             audio_normalized,
             (0, target_length - len(audio_normalized)),
             mode="constant",
-            constant_values=0.0
+            constant_values=0.0,
         )
     elif len(audio_normalized) > target_length:
         audio_normalized = audio_normalized[:target_length]

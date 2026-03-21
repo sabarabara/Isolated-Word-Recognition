@@ -1,13 +1,21 @@
-"""
-src/data/augmentation.py
-音声データ拡張。
-"""
+"""音声データ拡張ユーティリティ。"""
+
+from dataclasses import dataclass
+
 import numpy as np
-from src.config import AugmentationConfig
+
+
+@dataclass
+class AugmentationConfig:
+    noise_probability: float = 0.5
+    noise_min_snr_db: float = 10.0
+    noise_max_snr_db: float = 25.0
+    gain_probability: float = 0.3
+    gain_min_db: float = -3.0
+    gain_max_db: float = 3.0
 
 
 class AudioAugmentation:
-
     def __init__(self, config: AugmentationConfig, random_seed: int = 42):
         self.config = config
         self.rng = np.random.RandomState(random_seed)
@@ -38,15 +46,14 @@ class AudioAugmentation:
         if self.rng.random() < self.config.gain_probability:
             augmented = self._adjust_gain(augmented)
 
-        return augmented
+        return np.clip(augmented, -1.0, 1.0).astype(audio.dtype)
 
     def _add_noise(self, audio: np.ndarray) -> np.ndarray:
         """SNRに基づくガウシアンノイズの付加。"""
         snr_db = self.rng.uniform(
-            self.config.noise_min_snr_db,
-            self.config.noise_max_snr_db
+            self.config.noise_min_snr_db, self.config.noise_max_snr_db
         )
-        signal_power = np.mean(audio ** 2)
+        signal_power = np.mean(audio**2)
 
         if signal_power < 1e-10:
             return audio  # 無音にノイズを足しても意味がない
@@ -57,9 +64,22 @@ class AudioAugmentation:
 
     def _adjust_gain(self, audio: np.ndarray) -> np.ndarray:
         """ゲイン（音量）の調整。"""
-        gain_db = self.rng.uniform(
-            self.config.gain_min_db,
-            self.config.gain_max_db
-        )
+        gain_db = self.rng.uniform(self.config.gain_min_db, self.config.gain_max_db)
         gain_linear = 10 ** (gain_db / 20)
         return (audio * gain_linear).astype(audio.dtype)
+
+
+def build_audio_augmentation(config: dict):
+    """config(dict) から AudioAugmentation を構築する。"""
+    if not config.get("enable_augmentation", False):
+        return None
+
+    aug_cfg = AugmentationConfig(
+        noise_probability=float(config.get("noise_probability", 0.5)),
+        noise_min_snr_db=float(config.get("noise_min_snr_db", 10.0)),
+        noise_max_snr_db=float(config.get("noise_max_snr_db", 25.0)),
+        gain_probability=float(config.get("gain_probability", 0.3)),
+        gain_min_db=float(config.get("gain_min_db", -3.0)),
+        gain_max_db=float(config.get("gain_max_db", 3.0)),
+    )
+    return AudioAugmentation(aug_cfg, random_seed=int(config.get("seed", 42)))
