@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Dict
 import json
 import csv
 import time
@@ -10,20 +10,28 @@ import logging
 
 from configs.experiment_config import ExperimentConfig
 from utils.early_stopping import EarlyStopping
-from strategies.evaluation_strategy.strategies.topk.topk_evaluation_strategy import TopKEvaluationStrategy
+from strategies.evaluation_strategy.strategies.topk.topk_evaluation_strategy import (
+    TopKEvaluationStrategy,
+)
 
 
 class _NoOpWriter:
     """TensorBoard なしで動かすための noop ラッパー。"""
-    def add_scalars(self, *a, **kw): pass
-    def add_scalar(self, *a, **kw): pass
-    def close(self): pass
+
+    def add_scalars(self, *a, **kw):
+        pass
+
+    def add_scalar(self, *a, **kw):
+        pass
+
+    def close(self):
+        pass
+
 
 logger = logging.getLogger(__name__)
 
 
 class Trainer:
-
     def __init__(
         self,
         model: nn.Module,
@@ -76,11 +84,19 @@ class Trainer:
         self.csv_path = output_dir / "metrics" / "training_log.csv"
         with open(self.csv_path, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([
-                "epoch", "train_loss", "train_acc_top1",
-                "val_loss", "val_acc_top1", "val_acc_top3", "val_acc_top5",
-                "learning_rate", "elapsed_sec"
-            ])
+            writer.writerow(
+                [
+                    "epoch",
+                    "train_loss",
+                    "train_acc_top1",
+                    "val_loss",
+                    "val_acc_top1",
+                    "val_acc_top3",
+                    "val_acc_top5",
+                    "learning_rate",
+                    "elapsed_sec",
+                ]
+            )
 
     def train(self) -> Dict:
         """
@@ -122,30 +138,34 @@ class Trainer:
             )
 
             # TensorBoard記録
-            self.writer.add_scalars("Loss", {
-                "train": train_loss, "val": val_loss
-            }, epoch)
-            self.writer.add_scalars("Accuracy/Top-1", {
-                "train": train_acc, "val": val_metrics["top_1"]
-            }, epoch)
-            self.writer.add_scalar(
-                "Accuracy/Val_Top-3", val_metrics["top_3"], epoch
+            self.writer.add_scalars(
+                "Loss", {"train": train_loss, "val": val_loss}, epoch
             )
-            self.writer.add_scalar(
-                "Accuracy/Val_Top-5", val_metrics["top_5"], epoch
+            self.writer.add_scalars(
+                "Accuracy/Top-1",
+                {"train": train_acc, "val": val_metrics["top_1"]},
+                epoch,
             )
+            self.writer.add_scalar("Accuracy/Val_Top-3", val_metrics["top_3"], epoch)
+            self.writer.add_scalar("Accuracy/Val_Top-5", val_metrics["top_5"], epoch)
             self.writer.add_scalar("LearningRate", current_lr, epoch)
 
             # CSV記録
             with open(self.csv_path, "a", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow([
-                    epoch, f"{train_loss:.6f}", f"{train_acc:.4f}",
-                    f"{val_loss:.6f}", f"{val_metrics['top_1']:.4f}",
-                    f"{val_metrics['top_3']:.4f}",
-                    f"{val_metrics['top_5']:.4f}",
-                    f"{current_lr:.2e}", f"{elapsed:.2f}"
-                ])
+                writer.writerow(
+                    [
+                        epoch,
+                        f"{train_loss:.6f}",
+                        f"{train_acc:.4f}",
+                        f"{val_loss:.6f}",
+                        f"{val_metrics['top_1']:.4f}",
+                        f"{val_metrics['top_3']:.4f}",
+                        f"{val_metrics['top_5']:.4f}",
+                        f"{current_lr:.2e}",
+                        f"{elapsed:.2f}",
+                    ]
+                )
 
             # 学習率スケジューラ更新
             self.scheduler.step(val_metrics["top_1"])
@@ -156,7 +176,7 @@ class Trainer:
                 best_metrics = {
                     "epoch": epoch,
                     "val_loss": val_loss,
-                    **{f"val_{k}": v for k, v in val_metrics.items()}
+                    **{f"val_{k}": v for k, v in val_metrics.items()},
                 }
                 self._save_checkpoint(epoch, is_best=True)
 
@@ -172,9 +192,7 @@ class Trainer:
         self.writer.close()
 
         # 最終結果の保存
-        with open(
-            self.output_dir / "metrics" / "best_metrics.json", "w"
-        ) as f:
+        with open(self.output_dir / "metrics" / "best_metrics.json", "w") as f:
             json.dump(best_metrics, f, indent=2, ensure_ascii=False)
 
         return best_metrics
@@ -186,9 +204,7 @@ class Trainer:
         correct = 0
         total = 0
 
-        for batch_idx, (inputs, labels, _metadata) in enumerate(
-            self.train_loader
-        ):
+        for batch_idx, (inputs, labels, _metadata) in enumerate(self.train_loader):
             inputs = inputs.to(self.device, non_blocking=True)
             labels = labels.to(self.device, non_blocking=True)
 
@@ -296,4 +312,3 @@ class Trainer:
 
         torch.save(checkpoint, path)
         logger.info(f"チェックポイント保存: {path}")
-        

@@ -3,6 +3,7 @@
 (inputs, labels, metadata) の 3-tuple バッチに対応。
 cnn2d の Trainer と同一実装を共有する。
 """
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -15,20 +16,26 @@ import logging
 
 from configs.experiment_config import ExperimentConfig
 from utils.early_stopping import EarlyStopping
-from strategies.evaluation_strategy.strategies.topk.topk_evaluation_strategy import TopKEvaluationStrategy
+from strategies.evaluation_strategy.strategies.topk.topk_evaluation_strategy import (
+    TopKEvaluationStrategy,
+)
 
 
 class _NoOpWriter:
-    def add_scalars(self, *a, **kw): pass
-    def add_scalar(self, *a, **kw): pass
-    def close(self): pass
+    def add_scalars(self, *a, **kw):
+        pass
+
+    def add_scalar(self, *a, **kw):
+        pass
+
+    def close(self):
+        pass
 
 
 logger = logging.getLogger(__name__)
 
 
 class Trainer:
-
     def __init__(
         self,
         model: nn.Module,
@@ -70,11 +77,19 @@ class Trainer:
         self.csv_path = output_dir / "metrics" / "training_log.csv"
         with open(self.csv_path, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow([
-                "epoch", "train_loss", "train_acc_top1",
-                "val_loss", "val_acc_top1", "val_acc_top3", "val_acc_top5",
-                "learning_rate", "elapsed_sec",
-            ])
+            writer.writerow(
+                [
+                    "epoch",
+                    "train_loss",
+                    "train_acc_top1",
+                    "val_loss",
+                    "val_acc_top1",
+                    "val_acc_top3",
+                    "val_acc_top5",
+                    "learning_rate",
+                    "elapsed_sec",
+                ]
+            )
 
     def train(self) -> Dict:
         best_val_acc = 0.0
@@ -103,19 +118,26 @@ class Trainer:
                 f"| LR: {current_lr:.2e} | Time: {elapsed:.1f}s"
             )
 
-            self.writer.add_scalars("Loss", {"train": train_loss, "val": val_loss}, epoch)
+            self.writer.add_scalars(
+                "Loss", {"train": train_loss, "val": val_loss}, epoch
+            )
             self.writer.add_scalar("LearningRate", current_lr, epoch)
 
             with open(self.csv_path, "a", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow([
-                    epoch, f"{train_loss:.6f}", f"{train_acc:.4f}",
-                    f"{val_loss:.6f}",
-                    f"{val_metrics.get('top_1', 0):.4f}",
-                    f"{val_metrics.get('top_3', 0):.4f}",
-                    f"{val_metrics.get('top_5', 0):.4f}",
-                    f"{current_lr:.2e}", f"{elapsed:.2f}",
-                ])
+                writer.writerow(
+                    [
+                        epoch,
+                        f"{train_loss:.6f}",
+                        f"{train_acc:.4f}",
+                        f"{val_loss:.6f}",
+                        f"{val_metrics.get('top_1', 0):.4f}",
+                        f"{val_metrics.get('top_3', 0):.4f}",
+                        f"{val_metrics.get('top_5', 0):.4f}",
+                        f"{current_lr:.2e}",
+                        f"{elapsed:.2f}",
+                    ]
+                )
 
             self.scheduler.step(val_metrics.get("top_1", 0))
 

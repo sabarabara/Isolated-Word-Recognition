@@ -3,9 +3,14 @@ from typing import Optional
 
 from strategies.registry import MODEL_REGISTRY
 from strategies.model_strategy.model_strategy import ModelStrategy
+from strategies.model_strategy.strategys._shared.dataloader_builder import (
+    build_train_val_loaders,
+)
+from strategies.model_strategy.strategys._shared.train_runner import run_training
+from preprocess.augmentation import build_audio_augmentation
 
 
-@MODEL_REGISTRY.register("2dcnn")
+@MODEL_REGISTRY.register("cnn2d")
 class CNN2DStrategy(ModelStrategy):
     """Glue code to wire CNN2D dataset, model, trainer and evaluator.
 
@@ -34,6 +39,7 @@ class CNN2DStrategy(ModelStrategy):
 
     def _make_exp_config(self):
         from configs.experiment_config import make_experiment_config
+
         return make_experiment_config(self.config)
 
     def prepare_dataloader(self):
@@ -48,17 +54,15 @@ class CNN2DStrategy(ModelStrategy):
 
         batch_size = int(self.config.get("batch_size", 8))
 
-        dataset = CNN2DDataset(annotation_dir, audio_dir, config=self.config)
-
-        from torch.utils.data import DataLoader, random_split
-
-        n_total = len(dataset)
-        n_val = max(1, int(0.2 * n_total))
-        n_train = n_total - n_val
-        train_dataset, val_dataset = random_split(dataset, [n_train, n_val])
-
-        self.train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        self.val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+        train_aug = build_audio_augmentation(self.config)
+        self.train_loader, self.val_loader, n_train, n_val = build_train_val_loaders(
+            CNN2DDataset,
+            annotation_dir,
+            audio_dir,
+            config=self.config,
+            batch_size=batch_size,
+            train_augmentation=train_aug,
+        )
 
         print(f"prepare_dataloader: done (train={n_train}, val={n_val})")
 
@@ -71,7 +75,9 @@ class CNN2DStrategy(ModelStrategy):
 
         import torch
 
-        device = torch.device(self.config.get("device", "cuda" if torch.cuda.is_available() else "cpu"))
+        device = torch.device(
+            self.config.get("device", "cuda" if torch.cuda.is_available() else "cpu")
+        )
         self.device = device
 
         exp_cfg = self._make_exp_config()
@@ -84,24 +90,7 @@ class CNN2DStrategy(ModelStrategy):
         except Exception as e:
             print(f"train: skipped (missing deps): {e}")
             return
-
-        if self.model is None or self.train_loader is None:
-            print("train: skipped (model or dataloader missing)")
-            return
-
-        trainer = Trainer(
-            model=self.model,
-            config=self._make_exp_config(),
-            train_loader=self.train_loader,
-            val_loader=self.val_loader,
-            device=self.device,
-            output_dir=Path(self.config.get("output_dir", ".")),
-        )
-
-        self.trainer = trainer
-        best_metrics = trainer.train()
-        print("train: completed")
-        return best_metrics
+        return run_training(self, Trainer)
 
     def evaluate(self, output=None, target=None):
         try:

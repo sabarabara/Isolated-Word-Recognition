@@ -1,6 +1,6 @@
 """CNN1D 用データセット。波形を正規化しで1D入力として返す。"""
+
 import torch
-import numpy as np
 from pathlib import Path
 from typing import Optional
 
@@ -30,6 +30,8 @@ class CNN1DDataset(BaseDataset):
         sample = self.samples[idx]
         audio, sr = self._load_audio(sample["audio_path"])
         waveform = normalize_waveform(audio, self.target_length)  # (target_length,)
-        features_tensor = torch.tensor(waveform, dtype=torch.float32).unsqueeze(0)  # (1, T)
+        features_tensor = torch.tensor(waveform, dtype=torch.float32).unsqueeze(
+            0
+        )  # (1, T)
         label = torch.tensor(sample["card_label"], dtype=torch.long)
         return features_tensor, label, self._make_metadata(sample)

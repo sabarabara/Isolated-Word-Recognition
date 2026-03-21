@@ -1,14 +1,19 @@
 """CNN1D モデルストラテジー。"""
+
 from pathlib import Path
 from typing import Optional
 
 from strategies.registry import MODEL_REGISTRY
 from strategies.model_strategy.model_strategy import ModelStrategy
+from strategies.model_strategy.strategys._shared.dataloader_builder import (
+    build_train_val_loaders,
+)
+from strategies.model_strategy.strategys._shared.train_runner import run_training
+from preprocess.augmentation import build_audio_augmentation
 
 
-@MODEL_REGISTRY.register("1dcnn")
+@MODEL_REGISTRY.register("cnn1d")
 class CNN1DStrategy(ModelStrategy):
-
     def __init__(self, eval_strategy: Optional[object] = None, config: dict = None):
         super().__init__(eval_strategy=eval_strategy)
         self.config = config or {}
@@ -23,10 +28,12 @@ class CNN1DStrategy(ModelStrategy):
         from strategies.model_strategy.strategys.cnn1d.model import CNN1DModel
         from strategies.model_strategy.strategys.cnn1d.trainer import Trainer
         from strategies.model_strategy.strategys.cnn1d.evaluator import Evaluator
+
         return CNN1DDataset, CNN1DModel, Trainer, Evaluator
 
     def _make_exp_config(self):
         from configs.experiment_config import make_experiment_config
+
         return make_experiment_config(self.config)
 
     def prepare_dataloader(self):
@@ -40,16 +47,15 @@ class CNN1DStrategy(ModelStrategy):
         audio_dir = Path(self.config.get("audio_dir", "data/outputs/segment"))
         batch_size = int(self.config.get("batch_size", 8))
 
-        dataset = CNN1DDataset(annotation_dir, audio_dir, config=self.config)
-
-        from torch.utils.data import DataLoader, random_split
-        n_total = len(dataset)
-        n_val = max(1, int(0.2 * n_total))
-        n_train = n_total - n_val
-        train_dataset, val_dataset = random_split(dataset, [n_train, n_val])
-
-        self.train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        self.val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+        train_aug = build_audio_augmentation(self.config)
+        self.train_loader, self.val_loader, n_train, n_val = build_train_val_loaders(
+            CNN1DDataset,
+            annotation_dir,
+            audio_dir,
+            config=self.config,
+            batch_size=batch_size,
+            train_augmentation=train_aug,
+        )
         print(f"prepare_dataloader: done (train={n_train}, val={n_val})")
 
     def build(self):
@@ -60,6 +66,7 @@ class CNN1DStrategy(ModelStrategy):
             return
 
         import torch
+
         self.device = torch.device(
             self.config.get("device", "cuda" if torch.cuda.is_available() else "cpu")
         )
@@ -72,22 +79,7 @@ class CNN1DStrategy(ModelStrategy):
         except Exception as e:
             print(f"train: skipped (missing deps): {e}")
             return
-
-        if self.model is None or self.train_loader is None:
-            print("train: skipped (model or dataloader missing)")
-            return
-
-        trainer = Trainer(
-            model=self.model,
-            config=self._make_exp_config(),
-            train_loader=self.train_loader,
-            val_loader=self.val_loader,
-            device=self.device,
-            output_dir=Path(self.config.get("output_dir", ".")),
-        )
-        self.trainer = trainer
-        trainer.train()
-        print("train: completed")
+        return run_training(self, Trainer)
 
     def evaluate(self, output=None, target=None):
         try:

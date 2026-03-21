@@ -1,4 +1,5 @@
 """cnn2d 用設定クラス。configs/experiment_configs.yaml からデフォルト値を読み込む。"""
+
 from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path

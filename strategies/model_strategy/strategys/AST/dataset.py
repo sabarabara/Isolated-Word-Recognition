@@ -1,7 +1,6 @@
 """AST 用データセット。CNN2DDataset と同形式 (1, n_mels, T)。"""
+
 import torch
-from pathlib import Path
-from typing import Optional
 
 from strategies.model_strategy.strategys._shared.base_dataset import BaseDataset
 from preprocess.feature_extraction import AudioConfig, compute_mel_spectrogram

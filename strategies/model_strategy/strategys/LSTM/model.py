@@ -1,18 +1,18 @@
 """双方向 LSTM モデル。入力 (batch, T, n_mels)。"""
+
 import torch
 import torch.nn as nn
 
 
 class LSTMModel(nn.Module):
-
     def __init__(self, config: dict = None):
         super().__init__()
         cfg = config or {}
-        input_size    = cfg.get("n_mels", 128)
-        hidden_size   = cfg.get("hidden_size", 256)
-        num_layers    = cfg.get("num_layers", 2)
-        dropout       = cfg.get("dropout", 0.3)
-        num_classes   = cfg.get("num_classes", 100)
+        input_size = cfg.get("n_mels", 128)
+        hidden_size = cfg.get("hidden_size", 256)
+        num_layers = cfg.get("num_layers", 2)
+        dropout = cfg.get("dropout", 0.3)
+        num_classes = cfg.get("num_classes", 100)
         bidirectional = cfg.get("bidirectional", True)
 
         self.lstm = nn.LSTM(

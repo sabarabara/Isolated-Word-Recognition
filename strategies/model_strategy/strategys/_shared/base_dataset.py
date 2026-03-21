@@ -3,9 +3,9 @@
 サブクラスは __getitem__ をオーバーライドして各モデル用の特徴量テンソルを返す。
 戻り値は (features_tensor, label, metadata) の 3-tuple に統一する。
 """
+
 import json
 import librosa
-import torch
 from pathlib import Path
 from typing import Optional
 from torch.utils.data import Dataset
@@ -15,7 +15,6 @@ logger = setup_logging(__name__)
 
 
 class BaseDataset(Dataset):
-
     def __init__(
         self,
         annotation_dir: Path,
@@ -30,12 +29,17 @@ class BaseDataset(Dataset):
 
     def _load_samples(self, annotation_dir: Path, audio_dir: Path) -> list:
         samples = []
-        annotation_files = sorted([
-            f for f in annotation_dir.glob("*.json")
-            if f.name != "example_annotation.json"
-        ])
+        annotation_files = sorted(
+            [
+                f
+                for f in annotation_dir.glob("*.json")
+                if f.name != "example_annotation.json"
+            ]
+        )
         if not annotation_files:
-            raise ValueError(f"アノテーションファイルが見つかりません: {annotation_dir}")
+            raise ValueError(
+                f"アノテーションファイルが見つかりません: {annotation_dir}"
+            )
 
         all_card_ids = set()
         for ann_path in annotation_files:
@@ -56,7 +60,9 @@ class BaseDataset(Dataset):
             for card in data["cards"]:
                 silence_file = card.get("silence_file")
                 if silence_file is None:
-                    logger.warning(f"カード{card['card_id']}のsilence_fileが見つかりません。スキップします。")
+                    logger.warning(
+                        f"カード{card['card_id']}のsilence_fileが見つかりません。スキップします。"
+                    )
                     continue
                 audio_path = audio_dir / silence_file
                 if not audio_path.exists():
@@ -64,20 +70,26 @@ class BaseDataset(Dataset):
                     continue
 
                 card_id = card["card_id"]
-                samples.append({
-                    "audio_path": str(audio_path),
-                    "session_id": session_id,
-                    "reader_id": reader_id,
-                    "card_id": card_id,
-                    "card_label": card_id_to_label[card_id],
-                    "card_text": card.get("card_text", ""),
-                    "initial_phoneme": card.get("initial_phoneme", "unknown"),
-                    "initial_phoneme_category": card.get("initial_phoneme_category", "unknown"),
-                    "articulation_place": card.get("articulation_place", "unknown"),
-                    "articulation_manner": card.get("articulation_manner", "unknown"),
-                    "kimariji_length": card.get("kimariji_length", 0),
-                    "silence_duration_sec": data.get("silence_duration_sec", 0.5),
-                })
+                samples.append(
+                    {
+                        "audio_path": str(audio_path),
+                        "session_id": session_id,
+                        "reader_id": reader_id,
+                        "card_id": card_id,
+                        "card_label": card_id_to_label[card_id],
+                        "card_text": card.get("card_text", ""),
+                        "initial_phoneme": card.get("initial_phoneme", "unknown"),
+                        "initial_phoneme_category": card.get(
+                            "initial_phoneme_category", "unknown"
+                        ),
+                        "articulation_place": card.get("articulation_place", "unknown"),
+                        "articulation_manner": card.get(
+                            "articulation_manner", "unknown"
+                        ),
+                        "kimariji_length": card.get("kimariji_length", 0),
+                        "silence_duration_sec": data.get("silence_duration_sec", 0.5),
+                    }
+                )
 
         return samples
 

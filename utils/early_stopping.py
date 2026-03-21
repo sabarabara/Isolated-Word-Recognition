@@ -1,4 +1,5 @@
 """早期停止コールバック。"""
+
 from __future__ import annotations
 
 

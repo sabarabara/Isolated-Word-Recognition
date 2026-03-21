@@ -93,3 +93,8 @@ karuta_project/
 
 
 python main.py experiment_name=test data_dir=data annotation_dir=data/annotation_data
+
+
+```
+cd /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/karuta_project && mkdir -p logs && /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/.venv/bin/python main.py > logs/cnn1d_100epoch.log 2>&1
+```

@@ -1,7 +1,6 @@
 """LSTM 用データセット。GRUDataset と同一形式 (T, n_mels)。"""
+
 import torch
-from pathlib import Path
-from typing import Optional
 
 from strategies.model_strategy.strategys._shared.base_dataset import BaseDataset
 from preprocess.feature_extraction import AudioConfig, compute_mel_spectrogram

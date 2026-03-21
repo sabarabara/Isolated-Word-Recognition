@@ -3,6 +3,7 @@
 (inputs, labels, metadata) の 3-tuple バッチに対応。
 CompositeEvaluation (TopK + ConfusionMatrix) を使用する。
 """
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -13,14 +14,17 @@ import logging
 
 from configs.experiment_config import ExperimentConfig
 from strategies.evaluation_strategy.composite import CompositeEvaluation
-from strategies.evaluation_strategy.strategies.topk.topk_evaluation_strategy import TopKEvaluationStrategy
-from strategies.evaluation_strategy.strategies.confusion_matrix.confusion_matrix_evaluation_strategy import ConfusionMatrixStrategy
+from strategies.evaluation_strategy.strategies.topk.topk_evaluation_strategy import (
+    TopKEvaluationStrategy,
+)
+from strategies.evaluation_strategy.strategies.confusion_matrix.confusion_matrix_evaluation_strategy import (
+    ConfusionMatrixStrategy,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class Evaluator:
-
     def __init__(
         self,
         model: nn.Module,
@@ -48,10 +52,12 @@ class Evaluator:
         all_outputs = torch.cat(all_outputs, dim=0)
         all_labels = torch.cat(all_labels, dim=0)
 
-        eval_strategy = CompositeEvaluation([
-            TopKEvaluationStrategy(k_list=[1, 3, 5]),
-            ConfusionMatrixStrategy(num_classes=self.config.model.num_classes),
-        ])
+        eval_strategy = CompositeEvaluation(
+            [
+                TopKEvaluationStrategy(k_list=[1, 3, 5]),
+                ConfusionMatrixStrategy(num_classes=self.config.model.num_classes),
+            ]
+        )
         metrics = eval_strategy.evaluate(all_outputs, all_labels)
 
         if save_predictions:

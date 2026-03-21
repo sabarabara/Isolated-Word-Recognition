@@ -1,8 +1,6 @@
 """GRU 用データセット。メルスペクトログラムを時系列 (T, n_mels) で返す。"""
+
 import torch
-import numpy as np
-from pathlib import Path
-from typing import Optional
 
 from strategies.model_strategy.strategys._shared.base_dataset import BaseDataset
 from preprocess.feature_extraction import AudioConfig, compute_mel_spectrogram
