@@ -8,6 +8,7 @@ from strategies.model_strategy.model_strategy import ModelStrategy
 from strategies.model_strategy.strategys._shared.dataloader_builder import (
     build_train_val_loaders,
 )
+from strategies.model_strategy.strategys._shared.lazy_imports import StrategyLazyImports
 from strategies.model_strategy.strategys._shared.train_runner import run_training
 
 
@@ -31,7 +32,13 @@ class CNN2DStrategy(ModelStrategy):
         from strategies.model_strategy.strategys._shared.base_trainer import Trainer
         from strategies.model_strategy.strategys._shared.base_evaluator import Evaluator
 
-        return CNN2DDataset, CNN2DModel, Trainer, Evaluator
+        return StrategyLazyImports(
+            dataset_cls=CNN2DDataset,
+            model_cls=CNN2DModel,
+            trainer_cls=Trainer,
+            evaluator_cls=Evaluator,
+            default_cam_layer="conv_layers.10",
+        )
 
     def _make_exp_config(self):
         from configs.experiment_config import make_experiment_config

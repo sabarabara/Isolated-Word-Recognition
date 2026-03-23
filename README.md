@@ -99,6 +99,11 @@ python main.py experiment_name=test data_dir=data annotation_dir=data/annotation
 cd /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/karuta_project && /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/.venv/bin/python main.py model_type=conformer epochs=100 > logs/conformer_100epoch.log 2>&1
 ```
 
+```
+cd /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/karuta_project
+/home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/.venv/bin/python tools/grad_cam_visualize.py --model-type conformer --checkpoint results/conformer/checkpoints/best_model.pt --sample-index 0
+```
+
 ## オフラインでデータ拡張して件数を増やす
 
 学習時に拡張をかけず、事前に拡張済みデータを生成したい場合は以下を実行します。

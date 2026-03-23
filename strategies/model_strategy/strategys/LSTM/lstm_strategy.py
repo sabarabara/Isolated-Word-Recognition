@@ -9,6 +9,7 @@ from strategies.model_strategy.model_strategy import ModelStrategy
 from strategies.model_strategy.strategys._shared.dataloader_builder import (
     build_train_val_loaders,
 )
+from strategies.model_strategy.strategys._shared.lazy_imports import StrategyLazyImports
 from strategies.model_strategy.strategys._shared.train_runner import run_training
 
 
@@ -29,7 +30,13 @@ class LSTMStrategy(ModelStrategy):
         from strategies.model_strategy.strategys._shared.base_trainer import Trainer
         from strategies.model_strategy.strategys._shared.base_evaluator import Evaluator
 
-        return LSTMDataset, LSTMModel, Trainer, Evaluator
+        return StrategyLazyImports(
+            dataset_cls=LSTMDataset,
+            model_cls=LSTMModel,
+            trainer_cls=Trainer,
+            evaluator_cls=Evaluator,
+            default_cam_layer=None,
+        )
 
     def _make_exp_config(self):
         from configs.experiment_config import make_experiment_config
