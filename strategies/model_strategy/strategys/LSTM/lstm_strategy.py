@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Optional
+import torch
 
 from strategies.registry import MODEL_REGISTRY
 from strategies.model_strategy.model_strategy import ModelStrategy
@@ -9,7 +10,6 @@ from strategies.model_strategy.strategys._shared.dataloader_builder import (
     build_train_val_loaders,
 )
 from strategies.model_strategy.strategys._shared.train_runner import run_training
-from preprocess.augmentation import build_audio_augmentation
 
 
 @MODEL_REGISTRY.register("lstm")
@@ -43,18 +43,14 @@ class LSTMStrategy(ModelStrategy):
             print(f"prepare_dataloader: skipped (missing deps): {e}")
             return
 
-        annotation_dir = Path(self.config.get("annotation_dir", "data/annotation_data"))
         audio_dir = Path(self.config.get("audio_dir", "data/outputs/segment"))
         batch_size = int(self.config.get("batch_size", 8))
 
-        train_aug = build_audio_augmentation(self.config)
         self.train_loader, self.val_loader, n_train, n_val = build_train_val_loaders(
             LSTMDataset,
-            annotation_dir,
             audio_dir,
             config=self.config,
             batch_size=batch_size,
-            train_augmentation=train_aug,
         )
         print(f"prepare_dataloader: done (train={n_train}, val={n_val})")
 
@@ -64,8 +60,6 @@ class LSTMStrategy(ModelStrategy):
         except Exception as e:
             print(f"build: skipped (missing deps): {e}")
             return
-
-        import torch
 
         self.device = torch.device(
             self.config.get("device", "cuda" if torch.cuda.is_available() else "cpu")

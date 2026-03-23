@@ -2,6 +2,8 @@
 experiment_name: default_experiment
 data_dir: data/audio
 annotation_dir: data/annotation_data
+train_annotation_dir: data/annotation_data_aug
+val_annotation_dir: data/annotation_data
 segment_duration: "0.1"
 model_type: gru
 input_type: melspectrogram
@@ -10,15 +12,6 @@ epochs: 100
 lr: 0.001
 seed: 42
 output_dir: ./results
-
-# Data augmentation (train split only)
-enable_augmentation: true
-noise_probability: 0.6
-noise_min_snr_db: 8.0
-noise_max_snr_db: 20.0
-gain_probability: 0.3
-gain_min_db: -3.0
-gain_max_db: 3.0
 
 # Evaluation toggles used by factories.create_eval_strategy
 use_topk: false

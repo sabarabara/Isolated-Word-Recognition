@@ -1,53 +1,38 @@
 """Shared DataLoader construction helpers for model strategies."""
 
-from torch.utils.data import DataLoader, Subset
+from pathlib import Path
+
 import torch
+from torch.utils.data import DataLoader, random_split
 
 
-def build_train_val_loaders(
-    dataset_cls,
-    annotation_dir,
-    audio_dir,
-    config: dict,
-    batch_size: int,
-    train_augmentation=None,
-):
-    """Create train/val loaders with identical split indices.
+def build_train_val_loaders(dataset_cls, audio_dir: Path, config: dict, batch_size: int):
+    """Create train/val loaders.
 
-    Train and validation use separate dataset instances so augmentation can be
-    enabled only for training.
+    If both train_annotation_dir and val_annotation_dir are provided, use them
+    directly (train uses augmented annotations, val uses original annotations).
+    Otherwise, split a single annotation_dir with an 80/20 random split.
     """
-    base_dataset = dataset_cls(
-        annotation_dir,
-        audio_dir,
-        config=config,
-        augmentation=None,
+    train_annotation_dir = config.get("train_annotation_dir")
+    val_annotation_dir = config.get("val_annotation_dir")
+
+    if train_annotation_dir and val_annotation_dir:
+        train_ds = dataset_cls(Path(train_annotation_dir), audio_dir, config)
+        val_ds = dataset_cls(Path(val_annotation_dir), audio_dir, config)
+        train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+        val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
+        return train_loader, val_loader, len(train_ds), len(val_ds)
+
+    annotation_dir = Path(config.get("annotation_dir", "data/annotation_data"))
+    ds = dataset_cls(annotation_dir, audio_dir, config)
+    n = len(ds)
+    n_train = int(n * 0.8)
+    n_val = n - n_train
+    train_ds, val_ds = random_split(
+        ds,
+        [n_train, n_val],
+        generator=torch.Generator().manual_seed(int(config.get("seed", 42))),
     )
-    n_total = len(base_dataset)
-    n_val = max(1, int(0.2 * n_total))
-    n_train = n_total - n_val
-
-    generator = torch.Generator().manual_seed(int(config.get("seed", 42)))
-    indices = torch.randperm(n_total, generator=generator).tolist()
-    train_indices = indices[:n_train]
-    val_indices = indices[n_train:]
-
-    train_dataset_full = dataset_cls(
-        annotation_dir,
-        audio_dir,
-        config=config,
-        augmentation=train_augmentation,
-    )
-    val_dataset_full = dataset_cls(
-        annotation_dir,
-        audio_dir,
-        config=config,
-        augmentation=None,
-    )
-
-    train_dataset = Subset(train_dataset_full, train_indices)
-    val_dataset = Subset(val_dataset_full, val_indices)
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
     return train_loader, val_loader, n_train, n_val

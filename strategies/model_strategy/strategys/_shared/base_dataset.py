@@ -41,14 +41,16 @@ class BaseDataset(Dataset):
                 f"アノテーションファイルが見つかりません: {annotation_dir}"
             )
 
-        all_card_ids = set()
+        all_card_texts = set()
         for ann_path in annotation_files:
             with open(ann_path, "r", encoding="utf-8") as f:
                 ann_data = json.load(f)
             for card in ann_data["cards"]:
-                all_card_ids.add(card["card_id"])
+                all_card_texts.add(card.get("card_text", ""))
 
-        card_id_to_label = {cid: idx for idx, cid in enumerate(sorted(all_card_ids))}
+        card_text_to_label = {
+            text: idx for idx, text in enumerate(sorted(all_card_texts))
+        }
 
         for ann_path in annotation_files:
             with open(ann_path, "r", encoding="utf-8") as f:
@@ -70,14 +72,15 @@ class BaseDataset(Dataset):
                     continue
 
                 card_id = card["card_id"]
+                card_text = card.get("card_text", "")
                 samples.append(
                     {
                         "audio_path": str(audio_path),
                         "session_id": session_id,
                         "reader_id": reader_id,
                         "card_id": card_id,
-                        "card_label": card_id_to_label[card_id],
-                        "card_text": card.get("card_text", ""),
+                        "card_label": card_text_to_label[card_text],
+                        "card_text": card_text,
                         "initial_phoneme": card.get("initial_phoneme", "unknown"),
                         "initial_phoneme_category": card.get(
                             "initial_phoneme_category", "unknown"

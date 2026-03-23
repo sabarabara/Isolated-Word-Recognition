@@ -1,7 +1,8 @@
-"""AST モデルストラテジー。"""
+"""Conformer-like model strategy (CNN + Transformer encoder)."""
 
 from pathlib import Path
 from typing import Optional
+
 import torch
 
 from strategies.registry import MODEL_REGISTRY
@@ -12,8 +13,8 @@ from strategies.model_strategy.strategys._shared.dataloader_builder import (
 from strategies.model_strategy.strategys._shared.train_runner import run_training
 
 
-@MODEL_REGISTRY.register("ast")
-class ASTStrategy(ModelStrategy):
+@MODEL_REGISTRY.register("conformer")
+class ConformerStrategy(ModelStrategy):
     def __init__(self, eval_strategy: Optional[object] = None, config: dict = None):
         super().__init__(eval_strategy=eval_strategy)
         self.config = config or {}
@@ -24,12 +25,12 @@ class ASTStrategy(ModelStrategy):
         self.val_loader = None
 
     def _lazy_imports(self):
-        from strategies.model_strategy.strategys.AST.dataset import ASTDataset
-        from strategies.model_strategy.strategys.AST.model import ASTModel
+        from strategies.model_strategy.strategys.conformer.dataset import ConformerDataset
+        from strategies.model_strategy.strategys.conformer.model import ConformerModel
         from strategies.model_strategy.strategys._shared.base_trainer import Trainer
         from strategies.model_strategy.strategys._shared.base_evaluator import Evaluator
 
-        return ASTDataset, ASTModel, Trainer, Evaluator
+        return ConformerDataset, ConformerModel, Trainer, Evaluator
 
     def _make_exp_config(self):
         from configs.experiment_config import make_experiment_config
@@ -38,22 +39,16 @@ class ASTStrategy(ModelStrategy):
 
     def prepare_dataloader(self):
         try:
-            ASTDataset, _, _, _ = self._lazy_imports()
+            ConformerDataset, _, _, _ = self._lazy_imports()
         except Exception as e:
             print(f"prepare_dataloader: skipped (missing deps): {e}")
             return
 
-        audio_dir = Path(self.config.get("audio_dir"))
-        assert audio_dir is not None, (
-            "audio_dir must be specified in config ast_strategy.py"
-        )
-        batch_size = int(self.config.get("batch_size"))
-        assert batch_size > 0, (
-            "batch_size must be a positive integer in config ast_strategy.py"
-        )
+        audio_dir = Path(self.config.get("audio_dir", "data/outputs/segment"))
+        batch_size = int(self.config.get("batch_size", 8))
 
         self.train_loader, self.val_loader, n_train, n_val = build_train_val_loaders(
-            ASTDataset,
+            ConformerDataset,
             audio_dir,
             config=self.config,
             batch_size=batch_size,
@@ -62,7 +57,7 @@ class ASTStrategy(ModelStrategy):
 
     def build(self):
         try:
-            _, ASTModel, _, _ = self._lazy_imports()
+            _, ConformerModel, _, _ = self._lazy_imports()
         except Exception as e:
             print(f"build: skipped (missing deps): {e}")
             return
@@ -70,7 +65,7 @@ class ASTStrategy(ModelStrategy):
         self.device = torch.device(
             self.config.get("device", "cuda" if torch.cuda.is_available() else "cpu")
         )
-        self.model = ASTModel(config=self.config)
+        self.model = ConformerModel(config=self.config)
         print("build: model constructed")
 
     def train(self):

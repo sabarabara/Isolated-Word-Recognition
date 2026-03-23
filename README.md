@@ -96,5 +96,20 @@ python main.py experiment_name=test data_dir=data annotation_dir=data/annotation
 
 
 ```
-cd /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/karuta_project && mkdir -p logs && /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/.venv/bin/python main.py > logs/cnn1d_100epoch.log 2>&1
+cd /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/karuta_project && /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/.venv/bin/python main.py model_type=conformer epochs=100 > logs/conformer_100epoch.log 2>&1
 ```
+
+## オフラインでデータ拡張して件数を増やす
+
+学習時に拡張をかけず、事前に拡張済みデータを生成したい場合は以下を実行します。
+
+```
+cd /home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/karuta_project
+/home/rtakahashi-tmp-pufferfish/rtakahashi/test/e/.venv/bin/python preprocess/create_augmented_dataset.py \
+    --annotation-dir data/annotation_data \
+    --audio-dir data/outputs/segment \
+    --out-annotation-dir data/annotation_data_aug \
+    --copies 5
+```
+
+生成後は学習時に annotation_dir を `data/annotation_data_aug` に切り替えて使用します。

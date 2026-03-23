@@ -4,7 +4,7 @@ import pkgutil
 import importlib
 
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from strategies.model_strategy.context import ModelContext
 from factories import create_model_strategy
@@ -29,20 +29,9 @@ def main(cfg: DictConfig):
 
     output_dir = str(Path(cfg.output_dir) / cfg.model_type)
 
-    config = {
-        "model_type": cfg.model_type,
-        "batch_size": cfg.batch_size,
-        "epochs": cfg.epochs,
-        "lr": cfg.lr,
-        "annotation_dir": cfg.annotation_dir,
-        "audio_dir": str(Path(cfg.data_dir).parent / "outputs" / "segment"),
-        "output_dir": output_dir,
-        "segment_duration": cfg.segment_duration,
-        "input_type": cfg.input_type,
-        "seed": cfg.seed,
-        "use_topk": cfg.use_topk,
-        "use_confusion": cfg.use_confusion,
-    }
+    config = OmegaConf.to_container(cfg, resolve=True)
+    config["audio_dir"] = str(Path(cfg.data_dir).parent / "outputs" / "segment")
+    config["output_dir"] = output_dir
 
     os.makedirs(output_dir, exist_ok=True)
 
